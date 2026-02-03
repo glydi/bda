@@ -1,31 +1,23 @@
 #!/bin/bash
 
-echo "🔧 Installing VirtualBox Guest Additions..."
+echo "🔧 Fixing Guest Additions without CD-ROM..."
 
-# Update system
 sudo apt update
+sudo apt install -y build-essential dkms linux-headers-$(uname -r) wget
 
-# Install required packages
-sudo apt install -y build-essential dkms linux-headers-$(uname -r)
+# Download latest Guest Additions ISO
+cd /tmp || exit 1
+wget https://download.virtualbox.org/virtualbox/7.0.14/VBoxGuestAdditions_7.0.14.iso
 
 # Create mount point
-sudo mkdir -p /media/cdrom
+sudo mkdir -p /mnt/vbox
 
-# Try mounting the CD-ROM
-if [ -e /dev/cdrom ]; then
-    sudo mount /dev/cdrom /media/cdrom
-elif [ -e /dev/sr0 ]; then
-    sudo mount /dev/sr0 /media/cdrom
-else
-    echo "❌ CD-ROM device not found."
-    echo "👉 Make sure: Devices → Insert Guest Additions CD Image"
-    exit 1
-fi
+# Mount ISO directly
+sudo mount -o loop VBoxGuestAdditions_7.0.14.iso /mnt/vbox
 
 # Run installer
-cd /media/cdrom || exit 1
+cd /mnt/vbox || exit 1
 sudo ./VBoxLinuxAdditions.run
 
-# Finish
-echo "✅ Installation complete. Rebooting..."
+echo "✅ Done. Rebooting..."
 sudo reboot
